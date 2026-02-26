@@ -17,15 +17,27 @@ RobotInfoStruct = "robot_info" / Struct(
     # define MANUAL                      15
     "penalty" / Byte,
     "secs_till_unpenalized" / Byte,
-    "number_of_warnings" / Byte,
-    "number_of_yellow_cards" / Byte,
-    "number_of_red_cards" / Byte,
-    "goalkeeper" / Flag
+    #"number_of_warnings" / Byte,
+    #"number_of_yellow_cards" / Byte,
+    #"number_of_red_cards" / Byte,
+    #"goalkeeper" / Flag
 )
 
 TeamInfoStruct = "team" / Struct(
     "team_number" / Byte,
-    "team_color" / Enum(Byte,
+    "field_player_color" / Enum(Byte,
+                        BLUE=0,
+                        RED=1,
+                        YELLOW=2,
+                        BLACK=3,
+                        WHITE=4,
+                        GREEN=5,
+                        ORANGE=6,
+                        PURPLE=7,
+                        BROWN=8,
+                        GRAY=9
+                        ),
+    "goalkeeper_color" / Enum(Byte,
                         BLUE=0,
                         RED=1,
                         YELLOW=2,
@@ -40,19 +52,30 @@ TeamInfoStruct = "team" / Struct(
     "score" / Byte,
     "penalty_shot" / Byte,  # penalty shot counter
     "single_shots" / Short,  # bits represent penalty shot success
-    "coach_sequence" / Byte,
-    "coach_message" / PaddedString(253, 'utf8'),
-    "coach" / RobotInfoStruct,
-    "players" / Array(11, RobotInfoStruct)
+    "message_budget" / Short, #is short here intentional?
+    "players" / Array(11, RobotInfoStruct) #always eleven fine?
 )
 
 GameStateStruct = "gamedata" / Struct(
     "header" / Const(b'RGme'),
-    "version" / Const(12, Short),
+    "to_motion" / Flag,
     "packet_number" / Byte,
     "players_per_team" / Byte,
-    "game_type" / Byte,
-    "game_state" / Enum(Byte,
+    "competition_phase" / Enum(Byte,
+                        COMPETITION_PHASE_ROUNDROBIN=0,
+                        COMPETITION_PHASE_PLAYOFF = 1
+                        ),
+    "competition_type" / Enum(Byte,
+                        COMPETITION_TYPE_NORMAL=0,
+                        COMPETITION_TYPE_MOST_PASSES=1
+                        ),
+    "game_phase" / Enum(Byte,
+                        GAME_PHASE_NORMAL=0,
+                        GAME_PHASE_PENALTYSHOOT=1,
+                        GAME_PHASE_OVERTIME =2,
+                        GAME_PHASE_TIMEOUT=3,
+                        ),
+    "state" / Enum(Byte,
                         STATE_INITIAL=0,
                         # auf startposition gehen
                         STATE_READY=1,
@@ -61,29 +84,22 @@ GameStateStruct = "gamedata" / Struct(
                         # spielen
                         STATE_PLAYING=3,
                         # spiel zu ende
-                        STATE_FINISHED=4
+                        STATE_FINISHED=4,
+                        # standby
+                        STATE_STANDBY=5
                         ),
-    "first_half" / Flag,
-    "kick_of_team" / Byte,
-    "secondary_state" / Enum(Byte,
-                             STATE_NORMAL=0,
-                             STATE_PENALTYSHOOT=1,
-                             STATE_OVERTIME=2,
-                             STATE_TIMEOUT=3,
-                             STATE_DIRECT_FREEKICK=4,
-                             STATE_INDIRECT_FREEKICK=5,
-                             STATE_PENALTYKICK=6,
-                             STATE_CORNERKICK=7,
-                             STATE_GOALKICK=8,
-                             STATE_THROWIN=9,
-                             DROPBALL=128,
-                             UNKNOWN=255
+    "set_play" / Enum(Byte,
+                             SET_PLAY_NONE=0,
+                             SET_PLAY_GOAL_KICK=1,
+                             SET_PLAY_PUSHING_FREE_KICK=2,
+                             SET_PLAY_CORNER_KICK=3,
+                             SET_PLAY_KICK_IN=4,
+                             SET_PLAY_PENALTY_KICK=5,
                              ),
-    "secondary_state_info" / Bytes(4),
-    "drop_in_team" / Flag,
-    "drop_in_time" / Short,
-    "seconds_remaining" / Int16sl,
-    "secondary_seconds_remaining" / Int16sl,
+    "first_half" / Flag,
+    "kicking_team" / Byte,
+    "secs_remaining" / Int16sl,
+    "secondary_time" / Int16sl,
     "teams" / Array(2, "team" / TeamInfoStruct)
 )
 

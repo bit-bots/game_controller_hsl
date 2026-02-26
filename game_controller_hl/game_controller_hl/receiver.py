@@ -157,6 +157,7 @@ class GameStateReceiver(Node):
 
 
     def answer_to_gamecontroller(self, peer):
+        #TODO: Antwort anpassen
         """ Sends a life sign to the game controller """
         # Build the answer package
         data = ResponseStruct.build(dict(
@@ -192,26 +193,35 @@ class GameStateReceiver(Node):
 
         return GameState(
             header = Header(stamp=self.get_clock().now().to_msg()),
-            game_state = state.game_state.intvalue,
-            secondary_state = state.secondary_state.intvalue,
-            secondary_state_mode = state.secondary_state_info[1],
+            players_per_team = state.players_per_team,
+            competition_phase = state.competition_phase.intvalue,
+            game_phase = state.game_phase.intvalue,
+            main_state = state.state.intvalue,
+            set_play = state.set_play.intvalue,
+            kicking_team = state.kicking_team,
             first_half = state.first_half,
             own_score = own_team.score,
             rival_score = rival_team.score,
-            seconds_remaining = state.seconds_remaining,
-            secondary_seconds_remaining = state.secondary_seconds_remaining,
-            has_kick_off = state.kick_of_team == self.team_number,
+            secs_remaining = state.secs_remaining,
+            secondary_time = state.secondary_time,
+            has_kick_off = state.kicking_team == self.team_number,
             penalized = this_robot.penalty != 0,
             seconds_till_unpenalized = this_robot.secs_till_unpenalized,
-            secondary_state_team = state.secondary_state_info[0],
-            team_color = own_team.team_color.intvalue,
-            drop_in_team = state.drop_in_team,
-            drop_in_time = state.drop_in_time,
+            own_player_color = own_team.field_player_color.intvalue,
+            own_goalie_color = own_team.goalkeeper_color.intvalue,
+            rival_player_color = rival_team.field_player_color.intvalue,
+            rival_goalie_color = rival_team.goalkeeper_color.intvalue,
+            #--- Gibt es nicht mehr? ---
+            #drop_in_team = state.drop_in_team,
+            #drop_in_time = state.drop_in_time,
             penalty_shot = own_team.penalty_shot,
             single_shots = own_team.single_shots,
-            coach_message = own_team.coach_message,
+            #--- Gibt es nicht mehr? Waren die ähnlich wie Message Budget? ---
+            #coach_message = own_team.coach_message,
+            message_budget = own_team.message_budget,
             team_mates_with_penalty = [player.penalty != 0 for player in own_team.players],
-            team_mates_with_red_card = [player.number_of_red_cards != 0 for player in own_team.players],
+            #--- Gibt es nicht mehr? Selber bemerken ob man rot hat? ---
+            #team_mates_with_red_card = [player.number_of_red_cards != 0 for player in own_team.players],
         )
 
     def get_time_since_last_package(self) -> Duration:
