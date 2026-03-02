@@ -108,7 +108,10 @@ GAME_CONTROLLER_RESPONSE_VERSION = 2
 ResponseStruct = Struct(
     "header" / Const(b"RGrt"),
     "version" / Const(GAME_CONTROLLER_RESPONSE_VERSION, Byte),
-    "team" / Byte,
-    "player" / Byte,
-    "message" / Byte
+    "player_number" / Byte,
+    "team_number" / Byte,
+    "fallen" / Flag,
+    "pose" / float[3],
+    "ball_age" / float,
+    "ball" / float[2]
 )

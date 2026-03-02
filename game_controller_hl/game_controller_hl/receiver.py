@@ -161,9 +161,12 @@ class GameStateReceiver(Node):
         """ Sends a life sign to the game controller """
         # Build the answer package
         data = ResponseStruct.build(dict(
-            team=self.team_number,
-            player=self.player_number,
-            message=2))
+            player_number = self.player_number,
+            team_number = self.team_number,
+            fallen = False,
+            pose = [0.0,0.0,0.0],
+            ball_age= 0.0,
+            ball = [0.0,0.0]))
         # Send the package
         self.get_logger().debug(f'Sending answer to {peer[0]}:{self.answer_port}')
         try:
