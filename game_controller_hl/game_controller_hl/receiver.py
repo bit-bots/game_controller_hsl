@@ -22,6 +22,9 @@ from rclpy.time import Time
 from rclpy.duration import Duration
 from std_msgs.msg import Header
 from construct import Container
+from soccer_model_msgs.msg import Ball as BallWithCovariance
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from std_msgs.msg import Float32
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 from game_controller_hl.gamestate import GameStateStruct, ResponseStruct
 from game_controller_hl.utils import get_parameters_from_other_node
@@ -60,6 +63,19 @@ class GameStateReceiver(Node):
             # Set the parameters
             self.team_number = params[team_id_param_name]
             self.player_number = params[bot_id_param_name]
+
+        # Create subscribers
+        self.ball_pose_with_cov: BallWithCovariance
+        self.ball_age: Float32
+        self.is_fallen: bool
+        self.pose: PoseWithCovarianceStamped
+        self.node.create_subscription(BallWithCovariance, "hsl_gamecontroller/ball_with_covariance", self.ball_pose_with_cov, 1)
+        self.node.create_subscription(Float32, "hsl_gamecontroller/ball_age", self.ball_age, 1)
+        self.node.create_subscription(bool, "hsl_gamecontroller/is_fallen", self.is_fallen, 1)
+        self.node.create_subscription(PoseWithCovarianceStamped, "hsl_gamecontroller/pose_stamped", self.pose, 1)
+        
+
+        self.get_logger().info(f'We are playing as player {self.player_number} in team {self.team_number}')
 
         self.get_logger().info(f'We are playing as player {self.player_number} in team {self.team_number}')
 
@@ -157,16 +173,15 @@ class GameStateReceiver(Node):
 
 
     def answer_to_gamecontroller(self, peer):
-        #TODO: Antwort anpassen
         """ Sends a life sign to the game controller """
         # Build the answer package
         data = ResponseStruct.build(dict(
             player_number = self.player_number,
             team_number = self.team_number,
-            fallen = False,
-            pose = [0.0,0.0,0.0],
-            ball_age= 0.0,
-            ball = [0.0,0.0]))
+            fallen = self.is_fallen,
+            pose = [self.pose.pose.position.x, self.pose.pose.position.y, self.pose.pose.position.z],
+            ball_age= self.ball_age,
+            ball = [self.ball_pose_with_cov.point.x,self.ball_pose_with_cov.point.y]))
         # Send the package
         self.get_logger().debug(f'Sending answer to {peer[0]}:{self.answer_port}')
         try:
