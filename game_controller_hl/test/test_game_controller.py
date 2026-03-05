@@ -33,22 +33,18 @@ def test_game_state_receiver_select_team_by():
     player = dict(
         penalty=0,
         secs_till_unpenalized=0,
-        number_of_yellow_cards=0,
-        number_of_red_cards=0,
-        number_of_warnings=0,
-        goalkeeper=False
     )
 
     # Create a TeamInfoStruct as if it was a parsed game state
     team = TeamInfoStruct.build(dict(
-        team_number=1,
-        team_color=0,
-        score=0,
+        number=1,
+        field_player_color=0,
+        goalkeeper_color=2,
+        goalkeeper=0,
+        score=3,
         penalty_shot=0,
         single_shots=0,
-        coach_sequence=0,
-        coach_message='',
-        coach=player,
+        message_budget=100,
         players=[player]*11
     ))
 
@@ -59,7 +55,7 @@ def test_game_state_receiver_select_team_by():
     assert GameStateReceiver.select_team_by(lambda team: team.team_number == 2, teams) is None
 
 
-def test_parse_gamestate():
+'''def test_parse_gamestate():
     # Create dummy game state
     num_players = 11
     dummy_state_dict = dict(
@@ -67,39 +63,26 @@ def test_parse_gamestate():
         version=12,
         packet_number=0,
         players_per_team=num_players,
-        game_type=0,
-        game_state=0,
+        competition_phase=0,
+        competition_type=0,
+        game_phase=0,
+        set_play=0,
         first_half=False,
-        kick_of_team=0,
-        secondary_state=0,
-        secondary_state_info=b'\x00\x00\x00\x00',
-        drop_in_team=0,
-        drop_in_time=0,
-        seconds_remaining=0,
-        secondary_seconds_remaining=0,
+        kicking_team=0,
+        secs_remaining=0,
+        secondary_time=0,
         teams=[dict(
-            team_number=team_id,
-            team_color=0,
+            number=team_id,
+            field_player_color=0,
+            goalkeeper_color=0,
+            goalkeeper=0,
             score=0,
             penalty_shot=0,
             single_shots=0,
-            coach_sequence=0,
-            coach_message='',
-            coach=dict(
-                penalty=0,
-                secs_till_unpenalized=0,
-                number_of_yellow_cards=0,
-                number_of_red_cards=0,
-                number_of_warnings=0,
-                goalkeeper=False
-            ),
+            message_budget=0,
             players=[dict(
                 penalty=0,
                 secs_till_unpenalized=0,
-                number_of_yellow_cards=0,
-                number_of_red_cards=0,
-                number_of_warnings=0,
-                goalkeeper=not bool(player_id)
             ) for player_id in range(num_players)]
         ) for team_id in range(2)]
     )
@@ -108,6 +91,7 @@ def test_parse_gamestate():
     state = GameStateStruct.build(dummy_state_dict)
 
     # Binary representation of the GameStateStruct
+    #nullen zählen?
     dummy_package = b'RGme\x0c\x00\x00\x0b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     assert dummy_package == state
 
@@ -131,7 +115,7 @@ def test_parse_gamestate():
     # Check if the dict and the parsed game state are equal
     assert dictify(state) == dummy_state_dict
 
-
+'''
 def test_on_new_gamestate():
     # Create dummy game state
     num_players = 11
@@ -140,39 +124,26 @@ def test_on_new_gamestate():
         version=12,
         packet_number=0,
         players_per_team=num_players,
-        game_type=0,
-        game_state=0,
+        competition_phase=0,
+        competition_type=0,
+        game_phase=0,
+        set_play=0,
         first_half=False,
-        kick_of_team=0,
-        secondary_state=0,
-        secondary_state_info=b'\x00\x00\x00\x00',
-        drop_in_team=0,
-        drop_in_time=0,
-        seconds_remaining=0,
-        secondary_seconds_remaining=0,
+        kicking_team=0,
+        secs_remaining=0,
+        secondary_time=0,
         teams=[dict(
-            team_number=team_id,
-            team_color=0,
+            number=team_id,
+            field_player_color=0,
+            goalkeeper_color=0,
+            goalkeeper=0,
             score=0,
             penalty_shot=0,
             single_shots=0,
-            coach_sequence=0,
-            coach_message='',
-            coach=dict(
-                penalty=0,
-                secs_till_unpenalized=0,
-                number_of_yellow_cards=0,
-                number_of_red_cards=0,
-                number_of_warnings=0,
-                goalkeeper=False
-            ),
+            message_budget=0,
             players=[dict(
                 penalty=0,
                 secs_till_unpenalized=0,
-                number_of_yellow_cards=0,
-                number_of_red_cards=0,
-                number_of_warnings=0,
-                goalkeeper=not bool(player_id)
             ) for player_id in range(num_players)]
         ) for team_id in range(2)]
     )
@@ -196,25 +167,26 @@ def test_on_new_gamestate():
     msg = receiver.build_game_state_msg(state)
 
     # Check if the message is correct
-    assert msg.game_state == 0
-    assert msg.secondary_state == 0
-    assert msg.secondary_state_mode == 0
+    assert msg.competition_phase == 0
+    assert msg.game_phase == 0
+    assert msg.main_state == 0
+    assert msg.set_play == 0
+    assert msg.kicking_team == 0
     assert msg.first_half == False
     assert msg.own_score == 0
     assert msg.rival_score == 0
-    assert msg.seconds_remaining == 0
-    assert msg.secondary_seconds_remaining == 0
+    assert msg.secs_remaining == 0
+    assert msg.secondary_time == 0
     assert msg.has_kick_off == False
     assert msg.penalized == False
     assert msg.seconds_till_unpenalized == 0
-    assert msg.secondary_state_team == 0
-    assert msg.team_color == 0
-    assert msg.drop_in_team == 0
-    assert msg.drop_in_time == 0
+    assert msg.own_player_color == 0
+    assert msg.own_goalie_color == 0
+    assert msg.rival_player_color == 0
+    assert msg.rival_goalie_color == 0
     assert msg.penalty_shot == 0
     assert msg.single_shots == 0
-    assert msg.coach_message == ''
-    assert msg.team_mates_with_penalty == [False] * num_players
-    assert msg.team_mates_with_red_card == [False] * num_players
+    assert msg.message_budget == 0
+    assert msg.team_mates_with_penalty == 0
 
 

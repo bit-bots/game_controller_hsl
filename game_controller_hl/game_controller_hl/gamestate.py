@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from construct import Byte, Struct, Enum, Bytes, Const, Array, Int16ul, PaddedString, Flag, Int16sl
+from construct import Byte, Struct, Enum, Bytes, Const, Array, Int16ul, PaddedString, Flag, Int16sl, Float32l
 
 Short = Int16ul
 
@@ -111,7 +111,7 @@ ResponseStruct = Struct(
     "player_number" / Byte,
     "team_number" / Byte,
     "fallen" / Flag,
-    "pose" / float[3],
-    "ball_age" / float,
-    "ball" / float[2]
+    "pose" / Float32l[3],
+    "ball_age" / Float32l,
+    "ball" / Float32l[2]
 )

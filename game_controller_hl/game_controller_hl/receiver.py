@@ -22,14 +22,14 @@ from rclpy.time import Time
 from rclpy.duration import Duration
 from std_msgs.msg import Header
 from construct import Container
-from soccer_model_msgs.msg import Ball as BallWithCovariance
-from geometry_msgs.msg import PoseWithCovarianceStamped
-from std_msgs.msg import Float32
+from geometry_msgs.msg import PoseWithCovarianceStamped, TwistWithCovariance
+from std_msgs.msg import Float32, Bool
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 from game_controller_hl.gamestate import GameStateStruct, ResponseStruct
 from game_controller_hl.utils import get_parameters_from_other_node
 
 from game_controller_hl_interfaces.msg import GameState
+from game_controller_hl_interfaces.msg import Ball as BallWithCovariance
 
 
 class GameStateReceiver(Node):
@@ -67,12 +67,12 @@ class GameStateReceiver(Node):
         # Create subscribers
         self.ball_pose_with_cov: BallWithCovariance
         self.ball_age: Float32
-        self.is_fallen: bool
+        self.is_fallen: Bool
         self.pose: PoseWithCovarianceStamped
-        self.node.create_subscription(BallWithCovariance, "hsl_gamecontroller/ball_with_covariance", self.ball_pose_with_cov, 1)
-        self.node.create_subscription(Float32, "hsl_gamecontroller/ball_age", self.ball_age, 1)
-        self.node.create_subscription(bool, "hsl_gamecontroller/is_fallen", self.is_fallen, 1)
-        self.node.create_subscription(PoseWithCovarianceStamped, "hsl_gamecontroller/pose_stamped", self.pose, 1)
+        self.create_subscription(BallWithCovariance, "hsl_gamecontroller/ball_with_covariance", self.ball_pose_with_cov_cb, 1)
+        self.create_subscription(Float32, "hsl_gamecontroller/ball_age", self.ball_age_cb, 1)
+        self.create_subscription(Bool, "hsl_gamecontroller/is_fallen", self.is_fallen_cb, 1)
+        self.create_subscription(PoseWithCovarianceStamped, "hsl_gamecontroller/pose_stamped", self.pose_cb, 1)
         
 
         self.get_logger().info(f'We are playing as player {self.player_number} in team {self.team_number}')
@@ -101,6 +101,18 @@ class GameStateReceiver(Node):
 
         # Create the socket we want to use for the communications
         self.socket = self._open_socket()
+
+    def ball_pose_with_cov_cb(self, msg: PoseWithCovarianceStamped):
+        self.ball_pose_with_cov = msg
+    
+    def ball_age_cb(self, msg: Float32):
+        self.ball_age = msg
+    
+    def is_fallen_cb(self, msg: Bool):
+        self.is_fallen = msg
+    
+    def pose_cb(self, msg: PoseWithCovarianceStamped):
+        self.pose = msg
 
     def _open_socket(self) -> socket.socket:
         """ Creates the socket """
@@ -222,7 +234,6 @@ class GameStateReceiver(Node):
             rival_score = rival_team.score,
             secs_remaining = state.secs_remaining,
             secondary_time = state.secondary_time,
-            has_kick_off = state.kicking_team == self.team_number,
             penalized = this_robot.penalty != 0,
             seconds_till_unpenalized = this_robot.secs_till_unpenalized,
             own_player_color = own_team.field_player_color.intvalue,
