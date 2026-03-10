@@ -24,11 +24,11 @@ from construct import Container
 from geometry_msgs.msg import PointStamped
 from std_msgs.msg import Float32, Bool
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
-from game_controller_hl.gamestate import GameStateStruct, ResponseStruct
-from game_controller_hl.utils import get_parameters_from_other_node
-from game_controller_hl_interfaces.msg import PlayerStatusPose
+from game_controller_hsl.gamestate import GameStateStruct, ResponseStruct
+from game_controller_hsl.utils import get_parameters_from_other_node
+from game_controller_hsl_interfaces.msg import PlayerStatusPose
 
-from game_controller_hl_interfaces.msg import GameState
+from game_controller_hsl_interfaces.msg import GameState
 
 
 class GameStateReceiver(Node):

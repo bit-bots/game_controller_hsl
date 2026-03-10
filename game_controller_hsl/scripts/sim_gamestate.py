@@ -14,8 +14,8 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, DurabilityPolicy
 
-from game_controller_hl_interfaces.msg import GameState
-from game_controller_hl.utils import get_parameters_from_other_node
+from game_controller_hsl_interfaces.msg import GameState
+from game_controller_hsl.utils import get_parameters_from_other_node
 
 
 class SimGamestate(Node):

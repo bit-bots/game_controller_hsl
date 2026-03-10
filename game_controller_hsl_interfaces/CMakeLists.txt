@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(game_controller_hl_interfaces)
+project(game_controller_hsl_interfaces)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_lint_auto REQUIRED)
