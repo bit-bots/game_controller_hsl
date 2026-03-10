@@ -10,7 +10,7 @@ uint8 players_per_team
 uint8 COMPETITION_TYPE_SMALL = 0
 unit8 COMPETITION_TYPE_MIDDLE = 1
 unit8 COMPETITION_TYPE_LARGE = 2
-uint8 competition_phase
+uint8 competition_type
 
 unit8 GAME_PHASE_TIMEOUT = 0
 unit8 GAME_PHASE_NORMAL = 1

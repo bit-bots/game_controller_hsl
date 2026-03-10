@@ -20,30 +20,36 @@ from game_controller_hl.utils import get_parameters_from_other_node
 
 class SimGamestate(Node):
     msg = """Setting the GameState by entering a number:
-0: GAMESTATE_INITIAL=0
-1: GAMESTATE_READY=1
-2: GAMESTATE_SET=2
-3: GAMESTATE_PLAYING=3
-4: GAMESTATE_FINISHED=4
 
-Set the secondary game state by entering:
-a: STATE_NORMAL = 0
-b: STATE_PENALTYSHOOT = 1
-c: STATE_OVERTIME = 2
-d: STATE_TIMEOUT = 3
-e: STATE_DIRECT_FREEKICK = 4
-f: STATE_INDIRECT_FREEKICK = 5
-g: STATE_PENALTYKICK = 6
-h: STATE_CORNER_KICK = 7
-i: STATE_GOAL_KICK = 8
-j: STATE_THROW_IN = 9
+0: GAMESTATE_INITIAL = 0
+1: GAMESTATE_READY = 1
+2: GAMESTATE_SET = 2
+3: GAMESTATE_PLAYING =3
+4: GAMESTATE_FINISHED = 4
+
+5: COMPETITION_TYPE_SMALL = 0
+6: COMPETITION_TYPE_MIDDLE = 1
+7: COMPETITION_TYPE_LARGE = 3
+
+Set the game phase by entering:
+a: GAME_PHASE_TIMEOUT = 0
+b: GAME_PHASE_NORMAL = 1
+c: GAME_PHASE_EXTRA_TIME = 2
+d: GAME_PHASE_PENALTY_SHOOT_OUT = 3
+
+Set play states by entering:
+e: SET_PLAY_NONE = 0
+f: SET_PLAY_DIRECT_FREE_KICK = 1
+g: SET_PLAY_INDIRECT_FREE_KICK = 2
+h: SET_PLAY_PENALTY_KICK = 3
+i: SET_PLAY_THROW_IN = 4
+j: SET_PLAY_GOAL_KICK = 5
+k: SET_PLAY_CORNER_KICK = 6
 
 p:     toggle penalized
-t:     toggle secondary state team
-m:     toggle secondary state mode
-k:     toggle kick off
+t:     toggle kicking team
+s:     toggle stopped state
 +:     increase own score by 1
-
 
 
 
@@ -79,8 +85,8 @@ CTRL-C to quit
         game_state_msg = GameState()
         game_state_msg.header.stamp = self.get_clock().now().to_msg()
 
-        # Init secondary state team to our teamID
-        game_state_msg.secondary_state_team = self.team_id
+        # Init kicking team to our teamID
+        game_state_msg.kicking_team = self.team_id
 
         try:
             print(self.msg)
@@ -90,20 +96,23 @@ CTRL-C to quit
                     break
                 elif key in ["0", "1", "2", "3", "4"]:
                     int_key = int(key)
-                    game_state_msg.game_state = int_key
+                    game_state_msg.main_state = int_key
+                elif key in ["5", "6", "7"]:
+                    int_key = int(key)
+                    game_state_msg.competition_type = int_key - 5
                 elif key == "p":  # penalize / unpenalize
                     game_state_msg.penalized = not game_state_msg.penalized
-                elif key in [chr(ord("a") + x) for x in range(10)]:
-                    game_state_msg.secondary_state = ord(key) - ord("a")
-                elif key == "m":
-                    game_state_msg.secondary_state_mode = (game_state_msg.secondary_state_mode + 1) % 3
+                elif key in [chr(ord("a") + x) for x in range(4)]:
+                    game_state_msg.game_phase = ord(key) - ord("a")
+                elif key in [chr(ord("e") + x) for x in range(7)]:
+                    game_state_msg.set_play = ord(key) - ord("e")
                 elif key == "t":
-                    if game_state_msg.secondary_state_team == self.team_id:
-                        game_state_msg.secondary_state_team = self.team_id + 1
+                    if game_state_msg.kicking_team == self.team_id:
+                        game_state_msg.kicking_team = self.team_id + 1
                     else:
-                        game_state_msg.secondary_state_team = self.team_id
-                elif key == "k":
-                    self.has_kick_off = not self.has_kick_off
+                        game_state_msg.kicking_team = self.team_id
+                elif key == "s":
+                    self.stopped = not self.stopped
                 elif key == "+":
                     game_state_msg.own_score += 1
                 game_state_msg.has_kick_off = self.has_kick_off
@@ -121,12 +130,12 @@ CTRL-C to quit
                 self.publisher.publish(game_state_msg)
                 print(
                     f"""Penalized:            {game_state_msg.penalized}
-Secondary State Team: {game_state_msg.secondary_state_team}
-Secondary State Mode: {game_state_msg.secondary_state_mode}
-Secondary State:      {game_state_msg.secondary_state}
-Gamestate:            {game_state_msg.game_state}
+Kicking Team: {game_state_msg.kicking_team}
+Game Phase: {game_state_msg.game_phase}
+Play Phase:      {game_state_msg.play_phase}
+Main State:            {game_state_msg.main_state}
 Has Kick Off:         {game_state_msg.has_kick_off} 
-
+Competition Type: {game_state_msg.competition_type}
 
 CTRL-C to quit
 """
