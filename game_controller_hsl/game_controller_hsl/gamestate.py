@@ -49,19 +49,19 @@ TeamInfoStruct = "team" / Struct(
                         BROWN=8,
                         GRAY=9
                         ),
-   "goalkeeper" / Byte,
-   "score" / Byte,
+    "goalkeeper" / Byte,
+    "score" / Byte,
     "penalty_shot" / Byte,  # penalty shot counter
     "single_shots" / Short,  # bits represent penalty shot success
     "message_budget" / Short,
-    "players" / Array(11, RobotInfoStruct) #always eleven fine?
+    "players" / Array(20, RobotInfoStruct) #always eleven fine?
 )
+
+GAME_CONTROLLER_RESPONSE_VERSION = 19
 
 GameStateStruct = "gamedata" / Struct(
     "header" / Const(b'RGme'),
-    #define as const vaild?
-    "version" /Const(4),
-    "to_motion" / Flag,
+    "version" / Const(GAME_CONTROLLER_RESPONSE_VERSION, Byte),
     "packet_number" / Byte,
     "players_per_team" / Byte,
     "competition_type" / Enum(Byte,
@@ -88,14 +88,14 @@ GameStateStruct = "gamedata" / Struct(
                         STATE_FINISHED=4
                         ),
     "set_play" / Enum(Byte,
-                             SET_PLAY_NONE=0,
-                             SET_PLAY_DIRECT_FREE_KICK=1,
-                             SET_PLAY_INDIRECT_FREE_KICK=2,
-                             SET_PLAY_PENALTY_KICK=3,
-                             SET_PLAY_THROW_IN=4,
-                             SET_PLAY_GOAL_KICK=5,
-                             SET_PLAY_CORNER_KICK=6
-                             ),
+                         SET_PLAY_NONE=0,
+                         SET_PLAY_DIRECT_FREE_KICK=1,
+                         SET_PLAY_INDIRECT_FREE_KICK=2,
+                         SET_PLAY_PENALTY_KICK=3,
+                         SET_PLAY_THROW_IN=4,
+                         SET_PLAY_GOAL_KICK=5,
+                         SET_PLAY_CORNER_KICK=6
+                         ),
     "first_half" / Flag,
     "kicking_team" / Byte,
     "secs_remaining" / Int16sl,
@@ -103,7 +103,7 @@ GameStateStruct = "gamedata" / Struct(
     "teams" / Array(2, "team" / TeamInfoStruct)
 )
 
-GAME_CONTROLLER_RESPONSE_VERSION = 2
+GAME_CONTROLLER_RESPONSE_VERSION = 4
 
 ResponseStruct = Struct(
     "header" / Const(b"RGrt"),

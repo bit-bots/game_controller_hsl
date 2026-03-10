@@ -26,9 +26,7 @@ from std_msgs.msg import Float32, Bool
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 from game_controller_hsl.gamestate import GameStateStruct, ResponseStruct
 from game_controller_hsl.utils import get_parameters_from_other_node
-from game_controller_hsl_interfaces.msg import PlayerStatusPose
-
-from game_controller_hsl_interfaces.msg import GameState
+from game_controller_hsl_interfaces.msg import GameState, PlayerStatusPose
 
 
 class GameStateReceiver(Node):
@@ -71,11 +69,12 @@ class GameStateReceiver(Node):
             self.team_number = params[team_id_param_name]
             self.player_number = params[bot_id_param_name]
 
+        self.is_fallen: bool = False
+        self.ball_age: float = 100 # Start with high value to show low confidence
+        self.ball_position_msg: PointStamped = PointStamped()
+        self.pose_msg: PlayerStatusPose = PlayerStatusPose()
+
         # Create subscribers
-        self.ball_position: PointStamped
-        self.ball_age: Float32
-        self.is_fallen: Bool
-        self.pose: PlayerStatusPose
         self.create_subscription(PointStamped, "hsl_gamecontroller/ball_position", self.ball_position_cb, 1)
         self.create_subscription(Float32, "hsl_gamecontroller/ball_age", self.ball_age_cb, 1)
         self.create_subscription(Bool, "hsl_gamecontroller/is_fallen", self.is_fallen_cb, 1)
@@ -104,16 +103,16 @@ class GameStateReceiver(Node):
         self.socket = self._open_socket()
 
     def ball_position_cb(self, msg: PointStamped):
-        self.ball_position = msg
+        self.ball_position_msg = msg
 
     def ball_age_cb(self, msg: Float32):
-        self.ball_age = msg
+        self.ball_age = msg.data
 
     def is_fallen_cb(self, msg: Bool):
-        self.is_fallen = msg
+        self.is_fallen = msg.data
 
     def pose_cb(self, msg: PlayerStatusPose):
-        self.pose = msg
+        self.pose_msg = msg
 
     def _open_socket(self) -> socket.socket:
         """Creates the socket"""
@@ -197,9 +196,9 @@ class GameStateReceiver(Node):
                 player_number=self.player_number,
                 team_number=self.team_number,
                 fallen=self.is_fallen,
-                pose=self.pose,
-                ball=[self.ball_position.point.x, self.ball_position.point.y],
+                pose=self.pose_msg.pose,
                 ball_age=self.ball_age,
+                ball=[self.ball_position_msg.point.x, self.ball_position_msg.point.y],
             )
         )
         # Send the package
