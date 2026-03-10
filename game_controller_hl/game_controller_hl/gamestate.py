@@ -17,8 +17,8 @@ RobotInfoStruct = "robot_info" / Struct(
     # define MANUAL                      15
     "penalty" / Byte,
     "secs_till_unpenalized" / Byte,
-    #"number_of_warnings" / Byte,
-    #"number_of_yellow_cards" / Byte,
+    "warnings" / Byte,
+    "cautions" / Byte,
     #"number_of_red_cards" / Byte,
     #"goalkeeper" / Flag
 )
@@ -49,31 +49,32 @@ TeamInfoStruct = "team" / Struct(
                         BROWN=8,
                         GRAY=9
                         ),
-    "score" / Byte,
+   "goalkeeper" / Byte,
+   "score" / Byte,
     "penalty_shot" / Byte,  # penalty shot counter
     "single_shots" / Short,  # bits represent penalty shot success
-    "message_budget" / Short, #is short here intentional?
+    "message_budget" / Short,
     "players" / Array(11, RobotInfoStruct) #always eleven fine?
 )
 
 GameStateStruct = "gamedata" / Struct(
     "header" / Const(b'RGme'),
+    #define as const vaild?
+    "version" /Const(4),
     "to_motion" / Flag,
     "packet_number" / Byte,
-    "players_per_team" / Byte,
-    "competition_phase" / Enum(Byte,
-                        COMPETITION_PHASE_ROUNDROBIN=0,
-                        COMPETITION_PHASE_PLAYOFF = 1
-                        ),
+    "players_per_team" / Byte
     "competition_type" / Enum(Byte,
-                        COMPETITION_TYPE_NORMAL=0,
-                        COMPETITION_TYPE_MOST_PASSES=1
+                        COMPETITION_TYPE_SMALL=0,
+                        COMPETITION_TYPE_MIDDLE=2,
+                        COMPETITION_TYPE_LARGE=1
                         ),
+    "stopped" / Flag
     "game_phase" / Enum(Byte,
-                        GAME_PHASE_NORMAL=0,
-                        GAME_PHASE_PENALTYSHOOT=1,
-                        GAME_PHASE_OVERTIME =2,
-                        GAME_PHASE_TIMEOUT=3,
+                        GAME_PHASE_TIMEOUT=0,
+                        GAME_PHASE_NORMAL=1,
+                        GAME_PHASE_EXTRA_TIME =2,
+                        GAME_PHASE_PENALTY_SHOOT_OUT=3
                         ),
     "state" / Enum(Byte,
                         STATE_INITIAL=0,
@@ -84,17 +85,16 @@ GameStateStruct = "gamedata" / Struct(
                         # spielen
                         STATE_PLAYING=3,
                         # spiel zu ende
-                        STATE_FINISHED=4,
-                        # standby
-                        STATE_STANDBY=5
+                        STATE_FINISHED=4
                         ),
     "set_play" / Enum(Byte,
                              SET_PLAY_NONE=0,
-                             SET_PLAY_GOAL_KICK=1,
-                             SET_PLAY_PUSHING_FREE_KICK=2,
-                             SET_PLAY_CORNER_KICK=3,
-                             SET_PLAY_KICK_IN=4,
-                             SET_PLAY_PENALTY_KICK=5,
+                             SET_PLAY_DIRECT_FREE_KICK=1,
+                             SET_PLAY_INDIRECT_FREE_KICK=2,
+                             SET_PLAY_PENALTY_KICK=3,
+                             SET_PLAY_THROW_IN=4,
+                             SET_PLAY_GOAL_KICK=5,
+                             SET_PLAY_CORNER_KICK=6
                              ),
     "first_half" / Flag,
     "kicking_team" / Byte,
