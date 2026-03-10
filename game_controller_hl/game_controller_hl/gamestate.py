@@ -63,13 +63,13 @@ GameStateStruct = "gamedata" / Struct(
     "version" /Const(4),
     "to_motion" / Flag,
     "packet_number" / Byte,
-    "players_per_team" / Byte
+    "players_per_team" / Byte,
     "competition_type" / Enum(Byte,
                         COMPETITION_TYPE_SMALL=0,
                         COMPETITION_TYPE_MIDDLE=2,
                         COMPETITION_TYPE_LARGE=1
                         ),
-    "stopped" / Flag
+    "stopped" / Flag,
     "game_phase" / Enum(Byte,
                         GAME_PHASE_TIMEOUT=0,
                         GAME_PHASE_NORMAL=1,

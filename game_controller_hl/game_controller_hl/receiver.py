@@ -234,7 +234,7 @@ class GameStateReceiver(Node):
             set_play=state.set_play.intvalue,
             kicking_team=state.kicking_team,
             first_half=state.first_half,
-            stopped=state.stopped
+            stopped=state.stopped,
             own_score=own_team.score,
             rival_score=rival_team.score,
             secs_remaining=state.secs_remaining,
