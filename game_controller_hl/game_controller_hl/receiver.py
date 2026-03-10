@@ -228,7 +228,7 @@ class GameStateReceiver(Node):
         return GameState(
             header=Header(stamp=self.get_clock().now().to_msg()),
             players_per_team=state.players_per_team,
-            competition_phase=state.competition_phase.intvalue,
+            competition_type=state.competition_type.intvalue,
             game_phase=state.game_phase.intvalue,
             main_state=state.state.intvalue,
             set_play=state.set_play.intvalue,
