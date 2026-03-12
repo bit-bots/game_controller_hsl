@@ -50,6 +50,27 @@ p:     toggle penalized
 t:     toggle kicking team
 s:     toggle stopped state
 +:     increase own score by 1
+-:     increase rival score by 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -84,7 +105,7 @@ CTRL-C to quit
     def loop(self):
         game_state_msg = GameState()
         game_state_msg.header.stamp = self.get_clock().now().to_msg()
-
+        game_state_msg.players_per_team = 4
         # Init kicking team to our teamID
         game_state_msg.kicking_team = self.team_id
 
@@ -112,11 +133,18 @@ CTRL-C to quit
                     else:
                         game_state_msg.kicking_team = self.team_id
                 elif key == "s":
-                    self.stopped = not self.stopped
+                    game_state_msg.stopped = not game_state_msg.stopped
                 elif key == "+":
                     game_state_msg.own_score += 1
-                game_state_msg.has_kick_off = self.has_kick_off
+                elif key == "-":
+                    game_state_msg.rival_score += 1
 
+                sys.stdout.write("\x1b[A")
+                sys.stdout.write("\x1b[A")
+                sys.stdout.write("\x1b[A")
+                sys.stdout.write("\x1b[A")
+                sys.stdout.write("\x1b[A")
+                sys.stdout.write("\x1b[A")
                 sys.stdout.write("\x1b[A")
                 sys.stdout.write("\x1b[A")
                 sys.stdout.write("\x1b[A")
@@ -129,13 +157,19 @@ CTRL-C to quit
                 sys.stdout.write("\x1b[A")
                 self.publisher.publish(game_state_msg)
                 print(
-                    f"""Penalized:            {game_state_msg.penalized}
-Kicking Team: {game_state_msg.kicking_team}
-Game Phase: {game_state_msg.game_phase}
-Play Phase:      {game_state_msg.play_phase}
-Main State:            {game_state_msg.main_state}
-Has Kick Off:         {game_state_msg.has_kick_off} 
-Competition Type: {game_state_msg.competition_type}
+                    f"""
+
+Competition Type:   {game_state_msg.competition_type}
+Game Phase:         {game_state_msg.game_phase}
+Set Play:           {game_state_msg.set_play}
+Main State:         {game_state_msg.main_state}
+
+Kicking Team:       {game_state_msg.kicking_team}
+
+Penalized:          {game_state_msg.penalized}
+Stopped:            {game_state_msg.stopped}
+
+Goals(Own : Rival): {game_state_msg.own_score} : {game_state_msg.rival_score}
 
 CTRL-C to quit
 """
