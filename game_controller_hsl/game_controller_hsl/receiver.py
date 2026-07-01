@@ -34,8 +34,8 @@ from tf_transformations import euler_from_quaternion
 
 class GameStateReceiver(Node):
     """
-    This class puts up a simple UDP Server which receives uses *listen_host* and *listen_port* parameters to listen
-    packages from the game_controller and respond with the robots state.
+    This class provides a simple UDP Server which listens to packages from the game_controller on *listen_host* and *listen_port*
+    and respond with the robots state on *answer_port*.
 
     If it receives a package it will be interpreted with the construct data structure and the :func:`build_game_state_msg`
     will be called with the content to build a ros message of type :class:`game_controller_hsl_interfaces.msg.GameState`
@@ -85,7 +85,7 @@ class GameStateReceiver(Node):
         self.diagnostic_pub = self.create_publisher(DiagnosticArray, "diagnostics", 1)
 
         # The time in seconds after which we assume the game controller is lost and publish a warning in the diagnostics
-        self.game_controller_lost_time = 5
+        self.game_controller_lost_timeout: int = self.get_parameter("lost_timeout").get_parameter_value().integer_value
 
         # The address listening on and the port for sending back the robots meta data
         self.listening_address = (self.get_parameter("listen_host").value, self.get_parameter("listen_port").value)
@@ -116,7 +116,7 @@ class GameStateReceiver(Node):
             self.receive_and_answer_once()
             # Check if we didn't receive a package for a long time for publishing diagnostics
             received_message_lately = self.get_time_since_last_package() < Duration(
-                seconds=self.game_controller_lost_time
+                seconds=self.game_controller_lost_timeout
             )
             self.publish_diagnostics(received_message_lately)
 
